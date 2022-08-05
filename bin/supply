@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir> <env-dir>
+
+### Configure environment
+
+set -o errexit    # always exit on error
+set -o pipefail   # don't ignore exit codes when piping output
+unset GIT_DIR     # Avoid GIT_DIR leak from previous build steps
+
+### Formatting utilities
+
+indent() {
+  sed -u 's/^/       /'
+}
+
+### Constants
+
+CURL_VERSION=7.59.0
+LIBSSH2_VERSION=1.7.0
+
+### Configure directories
+
+BUILD_DIR=${1:-}
+CACHE_DIR=${2:-}
+ENV_DIR=${3:-}
+BP_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
+
+# Download libssh2
+
+LIBSSH2_URL=https://github.com/libssh2/libssh2/archive/libssh2-$LIBSSH2_VERSION.tar.gz
+
+mkdir -p $CACHE_DIR
+if ! [ -e $CACHE_DIR/libssh2-$LIBSSH2_VERSION.tar.gz ]; then
+  echo "-----> Downloading libssh2 $LIBSSH2_VERSION binaries from $LIBSSH2_URL"
+  curl $LIBSSH2_URL -L -s -o $CACHE_DIR/libssh2-$LIBSSH2_VERSION.tar.gz
+fi
+
+echo "-----> Extracting libssh2 $VERSION binaries to $BUILD_DIR/vendor/libssh2"
+mkdir -p $BUILD_DIR/vendor
+mkdir -p $BUILD_DIR/vendor/libssh2
+
+cd $CACHE_DIR
+ls -la .
+tar -xf libssh2-$LIBSSH2_VERSION.tar.gz
+cd libssh2-libssh2-$LIBSSH2_VERSION
+ls -la .
+./configure --prefix=$BUILD_DIR/vendor 2>&1 | indent
+make 2>&1 | indent
+make install  2>&1 | indent
+
+### Download, make and install
+
+echo "-----> Downloading curl $CURL_VERSION"
+DOWNLOAD_URL="http://archive.ubuntu.com/ubuntu/pool/main/c/curl/curl_$CURL_VERSION.orig.tar.gz"
+curl -sL "$DOWNLOAD_URL" > curl_$CURL_VERSION.orig.tar.gz 2>&1 | indent
+tar -xf curl_$CURL_VERSION.orig.tar.gz
+pushd curl-$CURL_VERSION
+echo "-----> Configuring curl with ssl and libssh2"
+./configure --prefix=$BUILD_DIR/vendor --with-ssl --with-libssh2=/app/vendor/libssh2 2>&1 | indent
+echo "-----> Building curl"
+make 2>&1 | indent
+echo "-----> Installing curl"
+make install 2>&1 | indent
+popd
+
+echo "-----> Setting up environment"
+mkdir -p $BUILD_DIR/.profile.d
+cp $BP_DIR/profile/* $BUILD_DIR/.profile.d/
