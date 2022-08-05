@@ -44,7 +44,7 @@ ls -la .
 tar -xf libssh2-$LIBSSH2_VERSION.tar.gz
 cd libssh2-libssh2-$LIBSSH2_VERSION
 ls -la .
-ln -s $(find /tmp -name libtoolize|tail -n 1) ./
+export PATH=$PATH:$(find /tmp -name libtoolize|tail -n 1|sed 's/\/libtoolize//')
 ./buildconf
 ./configure --prefix=$BUILD_DIR/vendor 2>&1 | indent
 make 2>&1 | indent
