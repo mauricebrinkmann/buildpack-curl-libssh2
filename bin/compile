@@ -25,6 +25,10 @@ CACHE_DIR=${2:-}
 ENV_DIR=${3:-}
 BP_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
 
+# apt-get dependencies
+
+sudo apt-get install -y manpages-dev autoconf automake libtool build-essential
+
 # Download libssh2
 
 LIBSSH2_URL=https://github.com/libssh2/libssh2/archive/libssh2-$LIBSSH2_VERSION.tar.gz
@@ -44,7 +48,7 @@ ls -la .
 tar -xf libssh2-$LIBSSH2_VERSION.tar.gz
 cd libssh2-libssh2-$LIBSSH2_VERSION
 ls -la .
-autoconf 2>&1 | indent
+autoreconf -i 2>&1 | indent
 ./configure --prefix=$BUILD_DIR/vendor 2>&1 | indent
 make 2>&1 | indent
 make install  2>&1 | indent
@@ -57,7 +61,7 @@ curl -sL "$DOWNLOAD_URL" > curl_$CURL_VERSION.orig.tar.gz 2>&1 | indent
 tar -xf curl_$CURL_VERSION.orig.tar.gz
 pushd curl-$CURL_VERSION
 echo "-----> Configuring curl with ssl and libssh2"
-autoconf 2>&1 | indent
+autoreconf -i 2>&1 | indent
 ./configure --prefix=$BUILD_DIR/vendor --with-ssl --with-libssh2=/app/vendor/libssh2 2>&1 | indent
 echo "-----> Building curl"
 make 2>&1 | indent
