@@ -15,7 +15,7 @@ indent() {
 
 ### Constants
 
-CURL_VERSION=7.59.0
+CURL_VERSION=7.68.0
 
 ### Configure directories
 
@@ -32,7 +32,7 @@ curl -sL "$DOWNLOAD_URL" > curl_$CURL_VERSION.orig.tar.gz 2>&1 | indent
 tar -xf curl_$CURL_VERSION.orig.tar.gz
 pushd curl-$CURL_VERSION
 echo "-----> Configuring curl with ssl and libssh2"
-autoreconf -i 2>&1 | indent
+autoreconf -fi 2>&1 | indent
 ./configure --prefix=$BUILD_DIR/vendor --with-ssl --with-libssh2=/app/vendor/libssh2 2>&1 | indent
 echo "-----> Building curl"
 make 2>&1 | indent
