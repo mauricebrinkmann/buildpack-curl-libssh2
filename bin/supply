@@ -25,6 +25,10 @@ CACHE_DIR=${2:-}
 ENV_DIR=${3:-}
 BP_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
 
+# apt-get dependencies
+
+sudo apt-get install manpages-dev autoconf automake libtool build-essential
+
 # Download libssh2
 
 LIBSSH2_URL=https://github.com/libssh2/libssh2/archive/libssh2-$LIBSSH2_VERSION.tar.gz
